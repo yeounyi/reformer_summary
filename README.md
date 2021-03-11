@@ -10,67 +10,70 @@
 
 ## 1. Axial Positional Encoding
 - 긴 input sequence가 주어지는 경우 standard positional encoding은 너무 많은 메모리를 사용함 
-    - $d_h$: hidden size, ```config.hidden_size```
-    - $n_{max}$: max position embeddings, ```config.max_position_embeddings``` *(defaults to 4096)*
-    - Standard Positional Encoding: $n_{max} \times d_h$
-    - Axial Positional Encoding: $n_\text{max}^1 \times d_h^1 + n_\text{max}^2 \times d_h^2$
-        - $n_\text{max}^1 \times n_\text{max}^2 = n_\text{max}$
-            - ```config.axial_pos_shape```: a tuple $(n_\text{max}^1, n_\text{max}^2)$
-        - $d_h^1 + d_h^2 = d_h$
-            - ```config.axial_pos_embds_dim```: a tuple $(d_h^1, d_h^2)$
+    - <img src="https://render.githubusercontent.com/render/math?math=d_h">: hidden size, ```config.hidden_size```
+    - <img src="https://render.githubusercontent.com/render/math?math=n_{max}">: max position embeddings, ```config.max_position_embeddings``` *(defaults to 4096)*
+    - Standard Positional Encoding: <img src="https://render.githubusercontent.com/render/math?math=n_{max} \times d_h">
+    - Axial Positional Encoding: <img src="https://render.githubusercontent.com/render/math?math=n_\text{max}^1 \times d_h^1 + n_\text{max}^2 \times d_h^2">
+        - <img src="https://render.githubusercontent.com/render/math?math=n_\text{max}^1 \times n_\text{max}^2 = n_\text{max}"> 
+            
+	    	- ```config.axial_pos_shape```: a tuple <img src="https://render.githubusercontent.com/render/math?math=(n_\text{max}^1, n_\text{max}^2)">
+        - <img src="https://render.githubusercontent.com/render/math?math=d_h^1 + d_h^2 = d_h">
+            
+	    	- ```config.axial_pos_embds_dim```: a tuple <img src="https://render.githubusercontent.com/render/math?math=(d_h^1, d_h^2)">
             
 ### Example
-$d_h = 4$, $n_{max} = 49$
+<img src="https://render.githubusercontent.com/render/math?math=d_h = 4, n_{max} = 49">
+
 #### 1. Standard Positional Encoding
 ![img](https://raw.githubusercontent.com/patrickvonplaten/scientific_images/master/reformer_benchmark/positional_encodings_default.png)
 <br>
 - 길이가 4인 49개의 벡터
-- $4 \times 49$  
+- <img src="https://render.githubusercontent.com/render/math?math=4 \times 49">
 
 #### 2. Axial Positional Encoding
-- $n_\text{max}^1 =7$,  $n_\text{max}^2 = 7$
-- $d_h^1 = 1$, $d_h^2 = 3$
+- <img src="https://render.githubusercontent.com/render/math?math=n_\text{max}^1 =7, n_\text{max}^2 = 7">
+- <img src="https://render.githubusercontent.com/render/math?math=d_h^1 = 1, d_h^2 = 3">
 <img src="https://raw.githubusercontent.com/patrickvonplaten/scientific_images/master/reformer_benchmark/3d_positional_encoding.png"  width="400"/>
 <br>
-- 길이가 4인 49개의 벡터가 7개씩 7줄로 배열되어 있음 $(n_\text{max}^1 \times n_\text{max}^2)$
+- 길이가 4인 49개의 벡터가 7개씩 7줄로 배열되어 있음 <img src="https://render.githubusercontent.com/render/math?math=(n_\text{max}^1 \times n_\text{max}^2)"> 
 
 
 ![alt text2](https://raw.githubusercontent.com/patrickvonplaten/scientific_images/master/reformer_benchmark/3d_positional_encoding_cut.png)
 <br>
 - 첫 번째 열의 7개 벡터만으로 나머지 벡터를 모두 나타내고자 함
-- $e_{up} = d_{h}^2 = 3$
-- $e_{down} = d_{h}^1 = 1$
+- <img src="https://render.githubusercontent.com/render/math?math=e_{up} = d_{h}^2 = 3">
+- <img src="https://render.githubusercontent.com/render/math?math=e_{down} = d_{h}^1 = 1">
+
 <br><br>
 - 7개 벡터의 윗부분(길이 3)은 column으로 확장함
-    - 첫번째 열의 벡터들($e_1$ ~ $e_7$) 윗부분 3만큼은 모두 첫번째 열의 첫 번째 벡터($e_1$)의 윗부분으로 채워짐 
-    - 두번째 열의 벡터들($e_8$ ~ $e_{14}$) 윗부분 3만큼은 모두 첫번째 열의 두 번째 벡터($e_2$)의 윗부분으로 채워짐
+    - 첫번째 열의 벡터들(<img src="https://render.githubusercontent.com/render/math?math=e_1 ~ e_7">) 윗부분 3만큼은 모두 첫번째 열의 첫 번째 벡터(<img src="https://render.githubusercontent.com/render/math?math=e_1">)의 윗부분으로 채워짐 
+    - 두번째 열의 벡터들(<img src="https://render.githubusercontent.com/render/math?math=e_8 ~ e_{14}">) 윗부분 3만큼은 모두 첫번째 열의 두 번째 벡터(<img src="https://render.githubusercontent.com/render/math?math=e_2">)의 윗부분으로 채워짐
     - ...
-    - 일곱번째 열의 벡터들($e_{43}$ ~ $e_{49}$) 윗부분 3만큼은 모두 첫번째 열의 일곱번째 벡터($e_7$)의 윗부분으로 채워짐
+    - 일곱번째 열의 벡터들(<img src="https://render.githubusercontent.com/render/math?math=e_{43} ~ e_{49}">) 윗부분 3만큼은 모두 첫번째 열의 일곱번째 벡터(<img src="https://render.githubusercontent.com/render/math?math=e_7">)의 윗부분으로 채워짐
 <br><br>
 - 7개 벡터의 아래부분(길이 1)은 row로 확장함
-    - 첫번째 행의 벡터들($e_1, e_8, ... , e_{43}$) 아랫부분 1만큼은 모두 첫번째 열의 첫 번째 벡터($e_1$)의 아랫부분으로 채워짐
-    - 두번째 행의 벡터들($e_2, e_9, ... , e_{44}$) 아랫부분 1만큼은 모두 첫번째 열의 두 번째 벡터($e_2$)의 아랫부분으로 채워짐  
+    - 첫번째 행의 벡터들(<img src="https://render.githubusercontent.com/render/math?math=e_1, e_8, ..., e_{43}">) 아랫부분 1만큼은 모두 첫번째 열의 첫 번째 벡터(<img src="https://render.githubusercontent.com/render/math?math=e_1">)의 아랫부분으로 채워짐
+    - 두번째 행의 벡터들(<img src="https://render.githubusercontent.com/render/math?math=e_2, e_9, ..., e_{44}">) 아랫부분 1만큼은 모두 첫번째 열의 두 번째 벡터(<img src="https://render.githubusercontent.com/render/math?math=e_2">)의 아랫부분으로 채워짐  
     - ... 
-    - 일곱번째 행의 벡터들($e_7, e_{14}, ... , e_{49}$) 아랫부분 1만큼은 모두 첫번째 열의 일곱 번째 벡터($e_7$)의 아랫부분으로 채워짐  
+    - 일곱번째 행의 벡터들(<img src="https://render.githubusercontent.com/render/math?math=e_7, e_{14}, ..., e_{49}">) 아랫부분 1만큼은 모두 첫번째 열의 일곱 번째 벡터(<img src="https://render.githubusercontent.com/render/math?math=e_7">)의 아랫부분으로 채워짐  
     
 <img src="https://raw.githubusercontent.com/patrickvonplaten/scientific_images/master/reformer_benchmark/axial_pos_encoding.png"  width="500"/>
 
 <br>
 
-- $e'_1, e'_2, ... e'_{49}$ 중에 같은 벡터가 하나도 없음
-
-- $n_\text{max}^1 \times d_h^1 + n_\text{max}^2 \times d_h^2$만으로 positional encoding 가능
+- <img src="https://render.githubusercontent.com/render/math?math=e'_1, e'2_, ..., e'_{49}"> 중에 같은 벡터가 하나도 없음
+- <img src="https://render.githubusercontent.com/render/math?math=n_\text{max}^1 \times d_h^1 + n_\text{max}^2 \times d_h^2">만으로 positional encoding 가능
 
 
 ## 2. LSH Attention
-- 기존 attention 계산에서 메모리 많이 사용하는 부분: $QK^T$
-    - Q, K, T shape 모두 *\[batch size, length, $d_{model}$\]* 이라고 하면, $QK^T$의 shape은 *\[batch size, length, length\]*
-        - ```config.attention_head_size```: $d_{model}$
+- 기존 attention 계산에서 메모리 많이 사용하는 부분: <img src="https://render.githubusercontent.com/render/math?math=QK^T"> 
+    - Q, K, T shape 모두 *\[batch size, length, $d_{model}$\]* 이라고 하면, <img src="https://render.githubusercontent.com/render/math?math=QK^T"> 의 shape은 *\[batch size, length, length\]*
+        - ```config.attention_head_size```: <img src="https://render.githubusercontent.com/render/math?math=d_{model}"> 
 <img src="https://github.com/yeounyi/reformer_summary/blob/main/img/1.png?raw=true" width="300"/>
 <br>
 
 #### 2.1. 하나의 query마다 attention 계산
--  attention을 matrix로 한 번에 계산하지 않고, 하나의 query 마다 계산한다면, $qK^T$의 shape은 *\[batch size, 1, length\]* 
+-  attention을 matrix로 한 번에 계산하지 않고, 하나의 query 마다 계산한다면, <img src="https://render.githubusercontent.com/render/math?math=qK^T">의 shape은 *\[batch size, 1, length\]* 
     - only use memory proprtional to *length* 
 <img src="https://github.com/yeounyi/reformer_summary/blob/main/img/2.png?raw=true" width="200"/>
 <br>
@@ -83,9 +86,9 @@ $d_h = 4$, $n_{max} = 49$
     - cf. original Transformer는 자기 자신도 attend 가능 
 
 #### 2.3. Hashing Attention
-- $softmax(QK^T)$에서 어차피 가장 큰 값만 지배적인 역할을 하고 나머지는 큰 영향 주지 않음 
-- $Q=K$ 이므로 각 $q_i$에 대해 가장 가까운 $key$들을 모두 찾아야 하는 것이 아니라, $q$끼리 가까운 것만 찾으면 됨 
-- 유사한 $q$끼리 하나의 cluster로 모아 $m$개의 cluster를 만들 수 있음
+- <img src="https://render.githubusercontent.com/render/math?math=softmax(QK^T)">에서 어차피 가장 큰 값만 지배적인 역할을 하고 나머지는 큰 영향 주지 않음 
+- <img src="https://render.githubusercontent.com/render/math?math=Q = K">이므로 각 <img src="https://render.githubusercontent.com/render/math?math=q_i">에 대해 가장 가까운 <img src="https://render.githubusercontent.com/render/math?math=key">들을 모두 찾아야 하는 것이 아니라, <img src="https://render.githubusercontent.com/render/math?math=q">끼리 가까운 것만 찾으면 됨 
+- 유사한 <img src="https://render.githubusercontent.com/render/math?math=q">끼리 하나의 cluster로 모아 <img src="https://render.githubusercontent.com/render/math?math=m">개의 cluster를 만들 수 있음
 <img src="https://github.com/yeounyi/reformer_summary/blob/main/img/4.png?raw=true" width="300"/>
 <br>
 - 그러면 같은 cluster 내에서만 softmax를 계산해도 됨. 유사하지 않은 모든 K(=Q)까지 모두 포함해서 계산할 필요 없음
@@ -126,13 +129,13 @@ $d_h = 4$, $n_{max} = 49$
 - model parameter만 사용하면서 특정 layer의 activation을 그 다음 layer의 activation으로 복원할 수 있음
 - back propagation을 위해 모든 activation을 저장해놓을 필요가 없음
 - reversible layer는 input, ouput을 pair로 받음  
-    - input: ($x_1, x_2$)
-    - output: ($y_1, y_2$)
+    - input: <img src="https://render.githubusercontent.com/render/math?math=(x_1, x_2)">
+    - output: <img src="https://render.githubusercontent.com/render/math?math=(y_1, y_2)">
     
 <img src="https://github.com/yeounyi/reformer_summary/blob/main/img/13.png?raw=true" width=500/>
 <br>
 
-- substracting을 통해 output ($y_1, y_2$)만 갖고 input ($x_1, x_2$)을 복원할 수 있음 
+- substracting을 통해 output <img src="https://render.githubusercontent.com/render/math?math=(y_1, y_2)">만 갖고 input <img src="https://render.githubusercontent.com/render/math?math=(x_1, x_2)">을 복원할 수 있음 
 
 <img src="https://github.com/yeounyi/reformer_summary/blob/main/img/18.png?raw=true" width=500/>
 <br>
@@ -145,18 +148,17 @@ $d_h = 4$, $n_{max} = 49$
 <br>
 
 #### 3.2. Chunking Feed Forward Layer
-- Attention 이후 2개의 Feed Forward Layer: $\mathbf{Y}_{\text{out}} = \text{Linear}_{\text{out}}(\mathbf{Y}_\text{int}) = 
-\text{Linear}_{\text{out}}(\text{Linear}_{\text{int}}(\mathbf{\overline{Z}}))$
-    - 여기서 $i$번째 output인 $y_{out,i}$는 $i$번째 input에만 영향 받고 다른 위치에 있는 input에는 영향 받지 않음
+- Attention 이후 2개의 Feed Forward Layer: <img src="https://render.githubusercontent.com/render/math?math=bf{Y}_{\text{out}} = \text{Linear}_{\text{out}}(\mathbf{Y}_\text{int}) = \text{Linear}_{\text{out}}(\text{Linear}_{\text{int}}(\mathbf{\overline{Z}}))">
+    - 여기서 <img src="https://render.githubusercontent.com/render/math?math=i">번째 output인 <img src="https://render.githubusercontent.com/render/math?math=y_{out,i}">는 <img src="https://render.githubusercontent.com/render/math?math=i">번째 input에만 영향 받고 다른 위치에 있는 input에는 영향 받지 않음
     - 따라서 chunking 가능 
 <br><br>  
-- $Y_{int}$의 dimension이 $Y_{out}$의 dimension보다 큼. 더 많은 memory 필요
-    - ```config.feed_forward_size```: $Y_{int}$의 output dimension
-    - ```config.hidden_size```: $Y_{out}$의 output dimension
+- <img src="https://render.githubusercontent.com/render/math?math=Y_{int}">의 dimension이 <img src="https://render.githubusercontent.com/render/math?math=Y_{out}">의 dimension보다 큼. 더 많은 memory 필요
+    - ```config.feed_forward_size```: <img src="https://render.githubusercontent.com/render/math?math=Y_{int}">의 output dimension
+    - ```config.hidden_size```: <img src="https://render.githubusercontent.com/render/math?math=Y_{out}">의 output dimension
 <img src="https://raw.githubusercontent.com/patrickvonplaten/scientific_images/master/reformer_benchmark/feed_forward_matrix.png" width=500/>
 <br>
 
-- chunking하여 계산 후 concat 하면 커다란 Y_int matrix 전체를 다 저장해놓을 필요없어 memory 절약 가능
+- chunking하여 계산 후 concat 하면 커다란 <img src="https://render.githubusercontent.com/render/math?math=Y_{int}"> matrix 전체를 다 저장해놓을 필요없어 memory 절약 가능
     - 그러나 시간은 좀 더 걸림 
     - memory와 time의 trade off 
 <img src="https://raw.githubusercontent.com/patrickvonplaten/scientific_images/master/reformer_benchmark/chunked_feed_forward.png" width=500/>

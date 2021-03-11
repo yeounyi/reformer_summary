@@ -67,7 +67,7 @@
 
 ## 2. LSH Attention
 - 기존 attention 계산에서 메모리 많이 사용하는 부분: <img src="https://render.githubusercontent.com/render/math?math=QK^T"> 
-    - Q, K, T shape 모두 *\[batch size, length, $d_{model}$\]* 이라고 하면, <img src="https://render.githubusercontent.com/render/math?math=QK^T"> 의 shape은 *\[batch size, length, length\]*
+    - Q, K, T shape 모두 *\[batch size, length, <img src="https://render.githubusercontent.com/render/math?math=d_{model}">\]* 이라고 하면, <img src="https://render.githubusercontent.com/render/math?math=QK^T"> 의 shape은 *\[batch size, length, length\]*
         - ```config.attention_head_size```: <img src="https://render.githubusercontent.com/render/math?math=d_{model}"> 
 <img src="https://github.com/yeounyi/reformer_summary/blob/main/img/1.png?raw=true" width="300"/>
 <br>
@@ -100,8 +100,11 @@
 - x → h(x)에 대응, 가까운 x끼리는 높은 확률로 같은 hash값을 갖게 됨 
 <img src="https://github.com/yeounyi/reformer_summary/blob/main/img/7.png?raw=true"/>
 <br>
+
 - 위의 x,y는 random rotation 했을 때 다른 구역에 위치하는 경우가 많아서 높은 확률로 다른 hash 값을 갖게 됨 
+
 - 아래 x,y는 random rotation 해도 계속 같은 구역에 위치해서 높은 확률로 같은 hash 값을 갖게 됨 
+
 - hash 여러 번 해서 정확도 높임 
     - ```config.num_hashes```: 몇 번의 hash를 할 지 
 
